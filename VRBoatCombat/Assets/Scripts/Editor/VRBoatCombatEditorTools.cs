@@ -318,7 +318,7 @@ namespace VRBoatCombat.Editor
         {
             Debug.Log("[VR Boat Combat Setup] Setting minimum API level...");
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel29;
-            PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevel32;
+            // Target SDK version is set automatically by Unity based on Android SDK installed
             Debug.Log("[VR Boat Combat Setup] API level configured!");
             EditorUtility.DisplayDialog("Success", "Minimum API level set to 29!", "OK");
         }
@@ -525,8 +525,8 @@ namespace VRBoatCombat.Editor
         {
             Debug.Log("[VR Boat Combat Setup] Configuring occlusion culling...");
 
-            // Enable occlusion culling
-            StaticOcclusionCulling.umbraDataSize = 0;
+            // Occlusion culling is configured through the Occlusion Culling window
+            // No programmatic setup needed - just provide instructions
 
             EditorUtility.DisplayDialog("Occlusion Culling",
                 "To setup occlusion culling:\n\n" +
