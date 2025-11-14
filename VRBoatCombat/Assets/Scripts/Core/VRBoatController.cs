@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
+using VRBoatCombat.Weapons;
 
 namespace VRBoatCombat.Core
 {
