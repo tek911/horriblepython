@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
+using VRBoatCombat.AI;
 
 namespace VRBoatCombat.Core
 {
