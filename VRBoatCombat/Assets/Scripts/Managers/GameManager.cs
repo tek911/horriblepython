@@ -21,7 +21,9 @@ namespace VRBoatCombat
         [SerializeField] private int score = 0;
         [SerializeField] private int enemiesDestroyed = 0;
         [SerializeField] private int vesselsCaptured = 0;
+        #pragma warning disable 0414 // Field assigned but never used (reserved for future implementation)
         [SerializeField] private float playerHealth = 100f;
+        #pragma warning restore 0414
 
         [Header("Difficulty")]
         [SerializeField] private float difficultyMultiplier = 1f;

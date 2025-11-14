@@ -13,7 +13,9 @@ namespace VRBoatCombat.Core
         [Header("Zipline Settings")]
         [SerializeField] private float ziplineSpeed = 10f;
         [SerializeField] private AnimationCurve speedCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+        #pragma warning disable 0414 // Field assigned but never used (reserved for future bidirectional zipline feature)
         [SerializeField] private bool allowBidirectional = true;
+        #pragma warning restore 0414
 
         [Header("Camera Transitions")]
         [SerializeField] private Camera playerCamera;
