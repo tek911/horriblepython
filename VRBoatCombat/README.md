@@ -2,9 +2,10 @@
 
 A native Android VR boat combat game for Meta Quest 2 and 3, built with Unity and C#.
 
-![Unity Version](https://img.shields.io/badge/Unity-2022.3_LTS-blue)
+![Unity Version](https://img.shields.io/badge/Unity-6000.2.2f1_(Unity_6)-blue)
 ![Platform](https://img.shields.io/badge/Platform-Meta_Quest_2%2F3-green)
 ![API Level](https://img.shields.io/badge/Android_API-29+-orange)
+![XR Interaction Toolkit](https://img.shields.io/badge/XR_Interaction_Toolkit-3.2.1-purple)
 
 ## 🎮 Game Overview
 
@@ -21,11 +22,13 @@ VR Boat Combat Quest is an immersive VR action game where you command a speedboa
 
 ## 🛠️ Technical Stack
 
-- **Engine**: Unity 2022.3 LTS
-- **VR Framework**: XR Interaction Toolkit with OpenXR
-- **Build Target**: Android (IL2CPP backend, API level 29+)
-- **Rendering**: Universal Render Pipeline (URP) optimized for mobile
+- **Engine**: Unity 6000.2.2f1 (Unity 6)
+- **VR Framework**: XR Interaction Toolkit 3.2.1 with OpenXR 1.14.3+
+- **Meta XR**: Unity OpenXR: Meta extension 2.1.0+
+- **Build Target**: Android (IL2CPP backend, API level 29-36)
+- **Rendering**: Universal Render Pipeline (URP) 17.0.3 optimized for mobile VR
 - **Physics**: Custom buoyancy system with Rigidbody-based movement
+- **Build Tools**: Gradle 8.11, AGP 8.7.2, NDK r27c, JDK 17
 
 ## 📁 Project Structure
 
@@ -59,10 +62,12 @@ VRBoatCombat/
 
 ### Prerequisites
 
-- Unity 2022.3 LTS or newer
-- Meta Quest 2 or Quest 3 headset
-- SideQuest (for sideloading APK)
-- USB cable for connecting Quest to PC
+- **Unity 6000.2.2f1 (Unity 6)** - Required for this version
+  - *Upgrading from 2022.3 LTS? See [UNITY6_UPGRADE_GUIDE.md](UNITY6_UPGRADE_GUIDE.md)*
+- Meta Quest 2, Quest 3, or Quest 3S headset
+- Meta XR SDK v74+ (automatically configured)
+- SideQuest or Meta Quest Developer Hub (for sideloading APK)
+- USB cable or WiFi connection for Quest debugging
 
 ### Installation Steps
 
@@ -86,10 +91,23 @@ VRBoatCombat/
 
 ## 📚 Documentation
 
+- **[UNITY6_UPGRADE_GUIDE.md](UNITY6_UPGRADE_GUIDE.md)** - **NEW!** Complete Unity 6 migration guide
 - **[SETUP_GUIDE.md](SETUP_GUIDE.md)** - Complete setup instructions for beginners
 - **[BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.md)** - Step-by-step build and deployment guide
 - **[NEXT_STEPS.md](NEXT_STEPS.md)** - Post-setup tasks and customization options
 - **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Common issues and solutions
+
+## ⚠️ Unity 6 Migration Notice
+
+**This project has been upgraded to Unity 6000.2.2f1 (Unity 6)!**
+
+Major changes include:
+- XR Interaction Toolkit 3.2.1 (breaking changes from 2.x)
+- URP 17.0.3 with HLSL shaders
+- Updated Android build tools (Gradle 8.11, NDK r27c)
+- Deprecated API replacements (`FindObjectOfType` → `FindAnyObjectByType`)
+
+**See [UNITY6_UPGRADE_GUIDE.md](UNITY6_UPGRADE_GUIDE.md) for complete migration details.**
 
 ## 🎯 Core Systems Overview
 

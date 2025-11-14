@@ -509,7 +509,7 @@ namespace VRBoatCombat.AI
 
         private void ApplyDifficultyScaling()
         {
-            GameManager gameManager = FindObjectOfType<GameManager>();
+            GameManager gameManager = FindAnyObjectByType<GameManager>();
             if (gameManager != null)
             {
                 difficultyMultiplier = gameManager.GetDifficultyMultiplier();

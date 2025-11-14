@@ -226,7 +226,7 @@ namespace VRBoatCombat.Core
             OnCaptureStarted?.Invoke();
 
             // Notify game manager to increase enemy spawn
-            GameManager gameManager = FindObjectOfType<GameManager>();
+            GameManager gameManager = FindAnyObjectByType<GameManager>();
             if (gameManager != null)
             {
                 gameManager.OnCaptureStarted(gameObject);
@@ -271,7 +271,7 @@ namespace VRBoatCombat.Core
             OnCaptureCompleted?.Invoke();
 
             // Notify game manager
-            GameManager gameManager = FindObjectOfType<GameManager>();
+            GameManager gameManager = FindAnyObjectByType<GameManager>();
             if (gameManager != null)
             {
                 gameManager.OnCaptureCompleted(gameObject);

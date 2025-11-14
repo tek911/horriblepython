@@ -82,7 +82,7 @@ namespace VRBoatCombat.Core
         private void Start()
         {
             // Find wave manager in scene
-            waveManager = FindObjectOfType<WaveManager>();
+            waveManager = FindAnyObjectByType<WaveManager>();
             if (waveManager == null && useWaveSystem)
             {
                 Debug.LogWarning("[BoatPhysics] WaveManager not found in scene. Wave interaction disabled.");

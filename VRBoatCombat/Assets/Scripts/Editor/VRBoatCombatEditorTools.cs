@@ -8,6 +8,13 @@ namespace VRBoatCombat.Editor
     /// <summary>
     /// Unity Editor tools for VR Boat Combat project setup and automation.
     /// Provides Tools menu with automated setup for XR, Android build, scenes, and prefabs.
+    ///
+    /// Updated for Unity 6000.2.2f1 (Unity 6):
+    /// - XR Interaction Toolkit 3.2.1
+    /// - OpenXR 1.14.3+
+    /// - Unity OpenXR: Meta extension 2.1.0+
+    /// - URP 17.0.3
+    /// - Gradle 8.11, AGP 8.7.2, NDK r27c
     /// </summary>
     public class VRBoatCombatEditorTools : EditorWindow
     {
@@ -241,37 +248,47 @@ namespace VRBoatCombat.Editor
         {
             Debug.Log("[VR Boat Combat Setup] Opening XR Plugin Management settings...");
             SettingsService.OpenProjectSettings("Project/XR Plug-in Management");
-            EditorUtility.DisplayDialog("XR Plugin Management",
-                "Please install:\n" +
-                "1. XR Plugin Management\n" +
-                "2. OpenXR Plugin\n" +
-                "3. XR Interaction Toolkit\n\n" +
-                "Then enable OpenXR for Android platform",
+            EditorUtility.DisplayDialog("XR Plugin Management - Unity 6",
+                "Unity 6 requires these packages:\n" +
+                "1. XR Plugin Management (4.5.0+)\n" +
+                "2. OpenXR Plugin (1.14.3+)\n" +
+                "3. Unity OpenXR: Meta (2.1.0+) - NEW!\n" +
+                "4. XR Interaction Toolkit (3.2.1+)\n\n" +
+                "Then enable OpenXR for Android platform\n\n" +
+                "NOTE: XRController is deprecated in XRI 3.0.\n" +
+                "Use Transform references with TrackedPoseDriver instead.",
                 "OK");
         }
 
         private void SetupOpenXRForQuest()
         {
             Debug.Log("[VR Boat Combat Setup] Configuring OpenXR for Quest...");
-            EditorUtility.DisplayDialog("OpenXR Setup",
-                "In XR Plugin Management:\n" +
+            EditorUtility.DisplayDialog("OpenXR Setup - Unity 6",
+                "In XR Plugin Management (Unity 6):\n" +
                 "1. Select Android tab\n" +
                 "2. Enable 'OpenXR'\n" +
                 "3. Click 'OpenXR' settings\n" +
-                "4. Add 'Oculus Touch Controller Profile'\n" +
-                "5. Enable 'Oculus Quest' feature group",
+                "4. Add 'Meta Quest Touch Pro Controller Profile'\n" +
+                "5. Enable 'Meta Quest Support' feature group\n" +
+                "6. Enable 'Meta Quest: Meta' extension features\n\n" +
+                "Unity 6 requires Meta XR SDK v74+ with OpenXR backend.",
                 "OK");
         }
 
         private void ConfigureXRInteractionToolkit()
         {
             Debug.Log("[VR Boat Combat Setup] Configuring XR Interaction Toolkit...");
-            EditorUtility.DisplayDialog("XR Interaction Toolkit",
-                "Install XR Interaction Toolkit from Package Manager:\n" +
+            EditorUtility.DisplayDialog("XR Interaction Toolkit 3.0+ (Unity 6)",
+                "Install XR Interaction Toolkit 3.2.1+ from Package Manager:\n" +
                 "1. Window > Package Manager\n" +
                 "2. Click '+' > Add package by name\n" +
                 "3. Name: com.unity.xr.interaction.toolkit\n" +
-                "4. Import samples if needed",
+                "4. Version: 3.2.1 (for Unity 6000.2)\n\n" +
+                "BREAKING CHANGES in XRI 3.0:\n" +
+                "- XRController deprecated (use TrackedPoseDriver)\n" +
+                "- LocomotionSystem → LocomotionMediator\n" +
+                "- Input actions now on individual interactors\n" +
+                "- Namespace reorganization",
                 "OK");
         }
 
@@ -317,10 +334,16 @@ namespace VRBoatCombat.Editor
         private void SetMinimumAPILevel()
         {
             Debug.Log("[VR Boat Combat Setup] Setting minimum API level...");
+            // Unity 6 with Meta Quest supports up to Android API 36 (Android 16)
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel29;
-            PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevel32;
-            Debug.Log("[VR Boat Combat Setup] API level configured!");
-            EditorUtility.DisplayDialog("Success", "Minimum API level set to 29!", "OK");
+            PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevel34; // Android 14
+            Debug.Log("[VR Boat Combat Setup] API level configured for Unity 6!");
+            EditorUtility.DisplayDialog("Success - Unity 6",
+                "Android API levels configured:\n" +
+                "- Minimum: API 29 (Android 10)\n" +
+                "- Target: API 34 (Android 14)\n\n" +
+                "Unity 6 supports up to API 36 (Android 16)",
+                "OK");
         }
 
         private void CreateMainGameScene()
@@ -381,7 +404,7 @@ namespace VRBoatCombat.Editor
             Lightmapping.giWorkflowMode = Lightmapping.GIWorkflowMode.OnDemand;
 
             // Find directional light or create one
-            Light dirLight = FindObjectOfType<Light>();
+            Light dirLight = FindAnyObjectByType<Light>();
             if (dirLight == null)
             {
                 GameObject lightObj = new GameObject("Directional Light");

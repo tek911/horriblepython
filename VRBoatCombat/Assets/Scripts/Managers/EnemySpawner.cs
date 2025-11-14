@@ -75,7 +75,7 @@ namespace VRBoatCombat
             }
 
             // Get object pooler
-            objectPooler = FindObjectOfType<ObjectPooler>();
+            objectPooler = FindAnyObjectByType<ObjectPooler>();
             if (objectPooler == null && enableObjectPooling)
             {
                 Debug.LogWarning("[EnemySpawner] ObjectPooler not found. Object pooling disabled.");

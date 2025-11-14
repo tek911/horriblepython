@@ -2,7 +2,7 @@ Shader "VRBoatCombat/StylizedWater"
 {
     Properties
     {
-        _Color ("Water Color", Color) = (0.0, 0.5, 1.0, 0.8)
+        [MainColor] _Color ("Water Color", Color) = (0.0, 0.5, 1.0, 0.8)
         _DeepColor ("Deep Water Color", Color) = (0.0, 0.2, 0.5, 1.0)
         _FresnelColor ("Fresnel Color", Color) = (0.8, 0.9, 1.0, 1.0)
 
@@ -25,6 +25,7 @@ Shader "VRBoatCombat/StylizedWater"
         Tags
         {
             "RenderType"="Transparent"
+            "RenderPipeline"="UniversalPipeline"
             "Queue"="Transparent"
             "IgnoreProjector"="True"
         }
@@ -33,107 +34,145 @@ Shader "VRBoatCombat/StylizedWater"
         Blend SrcAlpha OneMinusSrcAlpha
         ZWrite Off
 
-        CGPROGRAM
-        #pragma surface surf Standard alpha vertex:vert
-        #pragma target 3.0
-
-        // Mobile optimization
-        #pragma multi_compile_fog
-
-        struct Input
+        Pass
         {
-            float2 uv_MainTex;
-            float3 worldPos;
-            float3 viewDir;
-            float4 screenPos;
-            float eyeDepth;
-        };
+            Name "ForwardLit"
+            Tags { "LightMode" = "UniversalForward" }
 
-        half4 _Color;
-        half4 _DeepColor;
-        half4 _FresnelColor;
-        half4 _FoamColor;
+            HLSLPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
 
-        half _WaveSpeed;
-        half _WaveHeight;
-        half _WaveFrequency;
-        half _FoamAmount;
-        half _FoamCutoff;
-        half _Glossiness;
-        half _Metallic;
-        half _DepthFade;
+            #pragma multi_compile_fog
 
-        // Simple noise function
-        float noise(float2 uv)
-        {
-            return frac(sin(dot(uv, float2(12.9898, 78.233))) * 43758.5453);
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+
+            CBUFFER_START(UnityPerMaterial)
+                half4 _Color;
+                half4 _DeepColor;
+                half4 _FresnelColor;
+                half4 _FoamColor;
+
+                half _WaveSpeed;
+                half _WaveHeight;
+                half _WaveFrequency;
+                half _FoamAmount;
+                half _FoamCutoff;
+                half _Glossiness;
+                half _Metallic;
+                half _DepthFade;
+            CBUFFER_END
+
+            struct Attributes
+            {
+                float4 positionOS : POSITION;
+                float3 normalOS : NORMAL;
+                float2 uv : TEXCOORD0;
+            };
+
+            struct Varyings
+            {
+                float4 positionCS : SV_POSITION;
+                float2 uv : TEXCOORD0;
+                float3 normalWS : TEXCOORD1;
+                float3 viewDirWS : TEXCOORD2;
+                float3 positionWS : TEXCOORD3;
+                float eyeDepth : TEXCOORD4;
+                float fogFactor : TEXCOORD5;
+            };
+
+            // Simple noise function
+            float noise(float2 uv)
+            {
+                return frac(sin(dot(uv, float2(12.9898, 78.233))) * 43758.5453);
+            }
+
+            // Wave calculation
+            float wave(float2 pos, float time)
+            {
+                float w = 0.0;
+
+                // Multiple wave layers for complexity
+                w += sin(pos.x * _WaveFrequency + time * _WaveSpeed) * _WaveHeight;
+                w += sin(pos.y * _WaveFrequency * 0.7 + time * _WaveSpeed * 1.2) * _WaveHeight * 0.5;
+                w += sin((pos.x + pos.y) * _WaveFrequency * 0.5 + time * _WaveSpeed * 0.8) * _WaveHeight * 0.3;
+
+                return w * 0.1;
+            }
+
+            Varyings vert(Attributes input)
+            {
+                Varyings output;
+
+                float time = _Time.y;
+                float3 positionWS = TransformObjectToWorld(input.positionOS.xyz);
+
+                // Calculate wave displacement
+                float displacement = wave(positionWS.xz, time);
+                positionWS.y += displacement;
+
+                // Calculate normal for waves
+                float delta = 0.1;
+                float dX = wave(positionWS.xz + float2(delta, 0), time) - displacement;
+                float dZ = wave(positionWS.xz + float2(0, delta), time) - displacement;
+                float3 normalWS = normalize(float3(-dX, delta, -dZ));
+
+                output.positionCS = TransformWorldToHClip(positionWS);
+                output.positionWS = positionWS;
+                output.normalWS = normalWS;
+                output.viewDirWS = GetWorldSpaceViewDir(positionWS);
+                output.uv = input.uv;
+
+                // Store eye depth for foam
+                float4 positionVS = TransformWorldToView(positionWS);
+                output.eyeDepth = -positionVS.z;
+                output.fogFactor = ComputeFogFactor(output.positionCS.z);
+
+                return output;
+            }
+
+            half4 frag(Varyings input) : SV_Target
+            {
+                float time = _Time.y;
+
+                // Base water color
+                half4 waterColor = _Color;
+
+                // Depth-based color blending
+                float depthFactor = saturate(input.eyeDepth / _DepthFade);
+                waterColor = lerp(_Color, _DeepColor, depthFactor);
+
+                // Fresnel effect
+                float3 viewDirWS = normalize(input.viewDirWS);
+                float3 normalWS = normalize(input.normalWS);
+                float fresnel = 1.0 - saturate(dot(viewDirWS, normalWS));
+                fresnel = pow(fresnel, 3.0);
+                waterColor = lerp(waterColor, _FresnelColor, fresnel * 0.5);
+
+                // Foam (using noise)
+                float foamNoise = noise(input.positionWS.xz * 5.0 + time * 0.5);
+                float foam = step(_FoamCutoff, foamNoise) * _FoamAmount;
+                waterColor = lerp(waterColor, _FoamColor, foam);
+
+                // Apply lighting from main light
+                Light mainLight = GetMainLight();
+                half3 lighting = mainLight.color * saturate(dot(normalWS, mainLight.direction));
+                waterColor.rgb *= 0.5 + lighting * 0.5;
+
+                // Specular highlight
+                half3 halfDir = normalize(mainLight.direction + viewDirWS);
+                half spec = pow(saturate(dot(normalWS, halfDir)), 32.0) * _Glossiness;
+                waterColor.rgb += spec * mainLight.color;
+
+                // Apply fog
+                waterColor.rgb = MixFog(waterColor.rgb, input.fogFactor);
+
+                return waterColor;
+            }
+            ENDHLSL
         }
-
-        // Wave calculation
-        float wave(float2 pos, float time)
-        {
-            float w = 0.0;
-
-            // Multiple wave layers for complexity
-            w += sin(pos.x * _WaveFrequency + time * _WaveSpeed) * _WaveHeight;
-            w += sin(pos.y * _WaveFrequency * 0.7 + time * _WaveSpeed * 1.2) * _WaveHeight * 0.5;
-            w += sin((pos.x + pos.y) * _WaveFrequency * 0.5 + time * _WaveSpeed * 0.8) * _WaveHeight * 0.3;
-
-            return w * 0.1;
-        }
-
-        void vert(inout appdata_full v, out Input o)
-        {
-            UNITY_INITIALIZE_OUTPUT(Input, o);
-
-            float time = _Time.y;
-            float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
-
-            // Calculate wave displacement
-            float displacement = wave(worldPos.xz, time);
-            v.vertex.y += displacement;
-
-            // Calculate normal for waves
-            float delta = 0.1;
-            float dX = wave(worldPos.xz + float2(delta, 0), time) - displacement;
-            float dZ = wave(worldPos.xz + float2(0, delta), time) - displacement;
-
-            v.normal = normalize(float3(-dX, delta, -dZ));
-
-            // Store eye depth for foam
-            o.eyeDepth = -UnityObjectToViewPos(v.vertex).z;
-        }
-
-        void surf(Input IN, inout SurfaceOutputStandard o)
-        {
-            float time = _Time.y;
-
-            // Base water color
-            half4 waterColor = _Color;
-
-            // Depth-based color blending
-            float depthFactor = saturate(IN.eyeDepth / _DepthFade);
-            waterColor = lerp(_Color, _DeepColor, depthFactor);
-
-            // Fresnel effect
-            float fresnel = 1.0 - saturate(dot(normalize(IN.viewDir), o.Normal));
-            fresnel = pow(fresnel, 3.0);
-            waterColor = lerp(waterColor, _FresnelColor, fresnel * 0.5);
-
-            // Foam (using noise)
-            float foamNoise = noise(IN.worldPos.xz * 5.0 + time * 0.5);
-            float foam = step(_FoamCutoff, foamNoise) * _FoamAmount;
-            waterColor = lerp(waterColor, _FoamColor, foam);
-
-            // Output
-            o.Albedo = waterColor.rgb;
-            o.Metallic = _Metallic;
-            o.Smoothness = _Glossiness;
-            o.Alpha = waterColor.a;
-            o.Normal = UnpackNormal(float4(0, 0, 1, 1)); // Use vertex normal
-        }
-        ENDCG
     }
 
-    FallBack "Mobile/Diffuse"
+    FallBack "Universal Render Pipeline/Lit"
 }

@@ -115,7 +115,7 @@ namespace VRBoatCombat
             }
 
             // Get audio listener
-            AudioListener listener = FindObjectOfType<AudioListener>();
+            AudioListener listener = FindAnyObjectByType<AudioListener>();
             if (listener != null)
             {
                 listenerTransform = listener.transform;

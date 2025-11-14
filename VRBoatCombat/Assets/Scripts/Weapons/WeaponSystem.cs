@@ -84,7 +84,7 @@ namespace VRBoatCombat.Weapons
         private void Start()
         {
             // Get object pooler for projectile management
-            objectPooler = FindObjectOfType<ObjectPooler>();
+            objectPooler = FindAnyObjectByType<ObjectPooler>();
             if (objectPooler == null)
             {
                 Debug.LogWarning("[WeaponSystem] ObjectPooler not found. Projectiles will be instantiated directly (less efficient).");

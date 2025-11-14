@@ -83,12 +83,12 @@ namespace VRBoatCombat
 
             if (enemySpawner == null)
             {
-                enemySpawner = FindObjectOfType<EnemySpawner>();
+                enemySpawner = FindAnyObjectByType<EnemySpawner>();
             }
 
             if (uiManager == null)
             {
-                uiManager = FindObjectOfType<UI.UIManager>();
+                uiManager = FindAnyObjectByType<UI.UIManager>();
             }
         }
 

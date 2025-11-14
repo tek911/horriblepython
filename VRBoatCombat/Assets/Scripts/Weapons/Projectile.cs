@@ -155,7 +155,7 @@ namespace VRBoatCombat.Weapons
             if (impactEffect == null) return;
 
             // Spawn from pool if available
-            ObjectPooler pooler = FindObjectOfType<ObjectPooler>();
+            ObjectPooler pooler = FindAnyObjectByType<ObjectPooler>();
             GameObject effect;
 
             if (pooler != null)
@@ -197,7 +197,7 @@ namespace VRBoatCombat.Weapons
             }
 
             // Return to pool or destroy
-            ObjectPooler pooler = FindObjectOfType<ObjectPooler>();
+            ObjectPooler pooler = FindAnyObjectByType<ObjectPooler>();
             if (pooler != null)
             {
                 pooler.ReturnToPool(gameObject);

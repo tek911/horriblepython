@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
 namespace VRBoatCombat.Core
 {
@@ -8,13 +9,18 @@ namespace VRBoatCombat.Core
     /// Handles VR controller input for boat steering and weapon control.
     /// Left controller: Steering wheel interaction with grab mechanics
     /// Right controller: Weapon aiming and firing
+    ///
+    /// Updated for Unity 6 and XR Interaction Toolkit 3.0+
+    /// Uses Transform references instead of deprecated XRController
     /// </summary>
     [RequireComponent(typeof(BoatPhysics))]
     public class VRBoatController : MonoBehaviour
     {
         [Header("Controller References")]
-        [SerializeField] private XRController leftController;
-        [SerializeField] private XRController rightController;
+        [Tooltip("Transform of left controller (use XR Origin > Camera Offset > Left Controller)")]
+        [SerializeField] private Transform leftControllerTransform;
+        [Tooltip("Transform of right controller (use XR Origin > Camera Offset > Right Controller)")]
+        [SerializeField] private Transform rightControllerTransform;
         [SerializeField] private XRGrabInteractable steeringWheelInteractable;
 
         [Header("Steering Settings")]
@@ -140,7 +146,7 @@ namespace VRBoatCombat.Core
 
         private void ProcessSteeringInput()
         {
-            if (leftController == null) return;
+            if (leftControllerTransform == null) return;
 
             // Get controller rotation and position
             Vector2 thumbstickInput = Vector2.zero;
@@ -174,7 +180,7 @@ namespace VRBoatCombat.Core
 
         private void ProcessThrottleInput()
         {
-            if (leftController == null) return;
+            if (leftControllerTransform == null) return;
 
             // Get trigger value for throttle control
             float triggerValue = 0f;
@@ -202,10 +208,10 @@ namespace VRBoatCombat.Core
 
         private void ProcessWeaponAiming()
         {
-            if (rightController == null || weaponMount == null) return;
+            if (rightControllerTransform == null || weaponMount == null) return;
 
             // Get right controller rotation
-            Quaternion controllerRotation = rightController.transform.rotation;
+            Quaternion controllerRotation = rightControllerTransform.rotation;
 
             // Calculate target rotation for weapon mount
             Quaternion targetRotation = Quaternion.Lerp(
@@ -231,7 +237,7 @@ namespace VRBoatCombat.Core
 
         private void ProcessWeaponFiring()
         {
-            if (rightController == null || weaponSystem == null) return;
+            if (rightControllerTransform == null || weaponSystem == null) return;
 
             // Get trigger value
             float triggerValue = 0f;
